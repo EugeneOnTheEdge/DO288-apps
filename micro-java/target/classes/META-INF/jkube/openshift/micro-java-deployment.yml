@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    app.openshift.io/vcs-ref: micro-config-1
+    jkube.io/git-url: https://github.com/eugeneontheedge/DO288-apps
+    app.openshift.io/vcs-uri: https://github.com/eugeneontheedge/DO288-apps
+    jkube.io/git-commit: f355431fb67e02bf81041c1ddf395770a774c657
+    jkube.io/git-branch: micro-config-1
+  labels:
+    app: micro-java
+    provider: jkube
+    version: "1.0"
+    group: com.redhat.training.openshift.hello
+  name: micro-java
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: micro-java
+      provider: jkube
+      group: com.redhat.training.openshift.hello
+  template:
+    metadata:
+      labels:
+        app: micro-java
+        provider: jkube
+        version: "1.0"
+        group: com.redhat.training.openshift.hello
+      name: micro-java
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        envFrom:
+        - configMapRef:
+            name: configmap-hello
+        image: micro-java:1.0
+        imagePullPolicy: IfNotPresent
+        name: quarkus
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 9779
+          name: prometheus
+          protocol: TCP
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        securityContext:
+          privileged: false
